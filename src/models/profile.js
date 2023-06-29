@@ -1,8 +1,8 @@
 import { DataTypes, Model } from 'sequelize'
 import store from '../store.js'
+import Role from './role.js'
 
 class Profile extends Model {}
-
 Profile.init(
   {
     id: {
@@ -32,5 +32,10 @@ Profile.init(
   },
   { sequelize: store, paranoid: true }
 )
+Profile.tableName = "Profile";
+console.log(`aaaaaaaaaaaaaaaaaa  ${Profile.name}`)
+Role.belongsToMany(Profile, { through: 'ProfileRole', as: 'profilessss', tableName: 'ProfileRole' });
+Profile.belongsToMany(Role, { through: 'ProfileRole', as: 'roles', tableName: 'ProfileRole' });
+
 
 export default Profile
