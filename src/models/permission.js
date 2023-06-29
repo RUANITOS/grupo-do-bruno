@@ -1,9 +1,11 @@
 import { DataTypes, Model } from 'sequelize'
 import store from '../store.js'
 
-class Profile extends Model {}
+import RolePermission from './role-permission.js'
 
-Profile.init(
+class Permission extends Model {}
+
+Permission.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -16,21 +18,13 @@ Profile.init(
       allowNull: false,
       unique: true
     },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false
+    description: {
+      type: DataTypes.STRING
     }
   },
   { sequelize: store, paranoid: true }
 )
 
-export default Profile
+RolePermission.belongsTo(Permission, { as: 'permission' })
+
+export default Permission

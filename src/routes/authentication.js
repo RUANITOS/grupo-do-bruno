@@ -3,18 +3,18 @@ import { Op } from 'sequelize'
 import jwt from 'jsonwebtoken'
 import config from '../config.js'
 
-import Profile from '../models/profile.js'
+import User from '../models/user.js'
 
 const authentication = new Router()
 
 authentication.post('/', async (request, response) => {
-  const profile = await Profile.findOne({
+  const user = await User.findOne({
     where: {
       [Op.or]: [{ name: request.login }, { email: request.login }]
     }
   })
 
-  if (!profile) {
+  if (!user) {
     return response.status(401).json({ error: 'Invalid login or password' })
   }
 
@@ -22,16 +22,16 @@ authentication.post('/', async (request, response) => {
   const encoder = new TextEncoder()
   const data = encoder.encode(body.password)
   const hashBuffer = await crypto.subtle.digest(config.HASH_ALGORITHM, data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashArray = [...new Uint8Array(hashBuffer)]
   const hash = hashArray
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('')
 
-  if (profile.password !== hash) {
+  if (user.password !== hash) {
     return response.status(401).json({ error: 'Invalid login or password' })
   }
 
-  const token = jwt.sign({ id: profile.id }, config.SECRET_KEY, {
+  const token = jwt.sign({ id: user.id }, config.SECRET_KEY, {
     expiresIn: 1800
   })
 

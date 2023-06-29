@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken'
 import config from './config.js'
 
-import Profile from './models/profile.js'
+import User from './models/user.js'
+import Role from './models/role.js'
+import Permission from './models/permission.js'
 
 const middleware = async (request, response, next) => {
   const authHeader = request.headers.authorization
@@ -11,15 +13,14 @@ const middleware = async (request, response, next) => {
   const token = authHeader.split(' ')[1]
   try {
     const decodedToken = jwt.verify(token, config.SECRET_KEY)
-    const profile = await Profile.findByPk(decodedToken.id)
-    // const profile = await Profile.findByPk(decodedToken.profileId, {
-    //   include: [{ model: Role, include: [Permission] }]
-    // })
-    if (!profile) {
-      return response.status(401).json({ error: 'Profile not found' })
+    const user = await User.findByPk(decodedToken.id, {
+      include: [{ model: Role, include: [Permission] }]
+    })
+    if (!user) {
+      return response.status(401).json({ error: 'User not found' })
     }
 
-    request.profile = profile
+    request.user = user
     next()
   } catch {
     return response.status(401).json({ error: 'Invalid token' })

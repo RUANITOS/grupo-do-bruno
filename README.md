@@ -9,7 +9,7 @@ Before you get started with this project, you'll need to have the following inst
 - Node.js
 - pnpm
 
-You'll also need a database installed and running on your computer. This project supports multiple database dialects, so you can choose whichever one you prefer.
+You'll also need a database installed and running on your computer. This project supports PostgreSQL and MySQL dialects, so you can choose which one you prefer.
 
 ## Installation
 
@@ -18,24 +18,6 @@ To install the Mini-ERP application, follow these steps:
 1. Clone the project repository to your local machine.
 2. Navigate to the project directory in your terminal.
 3. Run `pnpm install` to install the project dependencies.
-
-## Sequelize Dialects
-
-Before you can use Mini-ERP with a specific database dialect, you'll need to install the corresponding Sequelize dialect package globally using pnpm.
-
-For example, if you want to use Mini-ERP with PostgreSQL, you'll need to install the `pg` and `pg-hstore` packages globally:
-
-```
-pnpm install -g pg pg-hstore
-```
-
-If you want to use Mini-ERP with MySQL, you'll need to install the `mysql2` package globally:
-
-```
-pnpm install -g mysql2
-```
-
-For a full list of supported Sequelize dialects and their corresponding packages, see the [Sequelize documentation](https://sequelize.org/).
 
 ## Configuration
 
@@ -83,7 +65,8 @@ The following diagram shows the relationship between the Sequelize models:
 
 ```mermaid
 classDiagram
-    class Profile {
+    class User {
+        <<Model>>
         +UUID id
         +string name
         +string email
@@ -92,17 +75,20 @@ classDiagram
     }
 
     class Movement {
+        <<Model>>
         +UUID id
         +Date startTime
         +Date endTime
-        +Profile profile
+        +User user
         +Location origin
         +Location destination
         +MovementItem[] movementItems
+        +Transaction[] transactions
         // Add additional attributes as needed
     }
 
     class MovementItem {
+        <<Model>>
         +UUID id
         +Movement movement
         +Resource resource
@@ -110,7 +96,15 @@ classDiagram
         // Add additional attributes as needed
     }
 
+    class Transaction {
+        <<Model>>
+        +UUID id
+        +Movement movement
+        // Add additional attributes as needed
+    }
+
     class Resource {
+        <<Model>>
         +UUID id
         +string name
         +string description
@@ -118,20 +112,22 @@ classDiagram
     }
 
     class Location {
+        <<Model>>
         +UUID id
         +string name
         +string type
         // Add additional attributes as needed
     }
 
-    Profile "1" -- "0..*" Movement : creates
-    Profile "1" -- "0..*" Resource : creates
-    Profile "1" -- "0..*" Location : creates
-    Profile "1" -- "0..*" MovementItem : fulfills
-    Profile "1" -- "0..*" MovementItem : recieves
-    Movement "1" -- "0..*" MovementItem : includes
+    User "1" -- "0..*" Movement : creates
+    User "1" -- "0..*" Resource : creates
+    User "1" -- "0..*" Location : creates
+    User "1" -- "0..*" Transaction : fulfills
+    User "1" -- "0..*" Transaction : recieves
     Movement "1" -- "0..1" Location : originates
     Movement "1" -- "0..1" Location : leads
+    Movement "1" -- "1..*" MovementItem : includes
+    Movement "1" -- "1..*" Transaction : includes
     MovementItem "0..*" -- "1" Location : resides
     MovementItem "0..*" -- "1" Resource : represents
 ```
