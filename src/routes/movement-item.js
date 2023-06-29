@@ -1,14 +1,17 @@
 import { Router } from 'express'
 import MovementItem from '../models/movement-item.js'
+import middleware from '../middleware.js'
 
 const routes = new Router()
 
 // Rota para buscar um item de movimentação por ID
-routes.get('/:id', async (request, response) => {
-  const { id } = request.params
+routes.get('/:name', middleware('movement_item_read'), async (request, response) => {
+  const { name } = request.params
 
   try {
-    const movementItem = await MovementItem.findByPk(id)
+    const movementItem = await MovementItem.findOne({
+      where: { name }
+    })
 
     if (!movementItem) {
       return response.status(404).json({ error: 'Movement item not found' })
@@ -21,7 +24,7 @@ routes.get('/:id', async (request, response) => {
 })
 
 // Rota para buscar todos os itens de movimentação
-routes.get('/getAll', async (request, response) => {
+routes.get('/getAll', middleware('movement_item_read') ,async (request, response) => {
   try {
     const movementItems = await MovementItem.findAll()
 
@@ -32,7 +35,7 @@ routes.get('/getAll', async (request, response) => {
 })
 
 // Rota para buscar itens de movimentação por ID de movimentação
-routes.get('/movement/:movementId', async (request, response) => {
+routes.get('/movement/:movementId', middleware('movement_item_read') , async (request, response) => {
   const { movementId } = request.params
 
   try {
@@ -47,7 +50,7 @@ routes.get('/movement/:movementId', async (request, response) => {
 })
 
 // Rota para buscar itens de movimentação por ID de recurso
-routes.get('/resource/:resourceId', async (request, response) => {
+routes.get('/resource/:resourceId', middleware('movement_item_read'), async (request, response) => {
   const { resourceId } = request.params
 
   try {
@@ -62,7 +65,7 @@ routes.get('/resource/:resourceId', async (request, response) => {
 })
 
 // Rota para buscar itens de movimentação por ID de localização
-routes.get('/location/:locationId', async (request, response) => {
+routes.get('/location/:locationId',middleware('movement_item_read'), async (request, response) => {
   const { locationId } = request.params
 
   try {
@@ -77,7 +80,7 @@ routes.get('/location/:locationId', async (request, response) => {
 })
 
 // Rota para criar um novo item de movimentação
-routes.post('', async (request, response) => {
+routes.post('', middleware('movement_item_create'), async (request, response) => {
   // Dados para criar o item de movimentação
   const { movementId, resourceId, locationId } = request.body
 
@@ -92,7 +95,7 @@ routes.post('', async (request, response) => {
 
 
 // Rota para atualizar um item de movimentação
-routes.put('/:id', async (request, response) => {
+routes.put('/:id',middleware('movement_item_upadate'), async (request, response) => {
     const { id } = request.params
     const { movementId, resourceId, locationId } = request.body
   
@@ -116,7 +119,7 @@ routes.put('/:id', async (request, response) => {
   })
   
   // Rota para deletar um item de movimentação
-  routes.delete('/:id', async (request, response) => {
+  routes.delete('/:id',middleware('movement_item_delete'), async (request, response) => {
     const { id } = request.params
   
     try {

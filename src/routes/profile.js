@@ -1,13 +1,16 @@
 import { Router } from 'express'
 import Profile from '../models/profile.js'
+import middleware from '../middleware.js'
 
 const routes = new Router()
 
-routes.get('/:id', async (request, response) => {
-  const { id } = request.params
+routes.get('/:name', middleware('profile_read'), async (request, response) => {
+  const { name } = request.params
 
   try {
-    const profile = await Profile.findByPk(id)
+    const profile = await Profile.findOne({
+      where: { name }
+    })
 
     if (!profile) {
       return response.status(404).json({ error: 'Profile not found' })
@@ -19,7 +22,7 @@ routes.get('/:id', async (request, response) => {
   }
 })
 
-routes.get('/getAll', async (request, response) => {
+routes.get('/getAll', middleware('profile_read'), async (request, response) => {
   try {
     const profiles = await Profile.findAll()
 
@@ -29,7 +32,7 @@ routes.get('/getAll', async (request, response) => {
   }
 })
 
-routes.get('/email/:email', async (request, response) => {
+routes.get('/email/:email', middleware('profile_read'), async (request, response) => {
   const { email } = request.params
 
   try {
@@ -47,7 +50,7 @@ routes.get('/email/:email', async (request, response) => {
   }
 })
 
-routes.get('/type/:type', async (request, response) => {
+routes.get('/type/:type', middleware('profile_read'), async (request, response) => {
   const { type } = request.params
 
   try {
@@ -61,7 +64,7 @@ routes.get('/type/:type', async (request, response) => {
   }
 })
 
-routes.post('', async (request, response) => {
+routes.post('', middleware('profile_create'), async (request, response) => {
   const { name, email, password, type } = request.body
 
   try {
@@ -73,7 +76,7 @@ routes.post('', async (request, response) => {
   }
 })
 
-routes.put('/:id', async (request, response) => {
+routes.put('/:id', middleware('profile_update'), async (request, response) => {
   const { id } = request.params
   const { name, email, password, type } = request.body
 
@@ -97,7 +100,7 @@ routes.put('/:id', async (request, response) => {
   }
 })
 
-routes.delete('/:id', async (request, response) => {
+routes.delete('/:id', middleware('profile_delete'), async (request, response) => {
     const { id } = request.params
   
     try {

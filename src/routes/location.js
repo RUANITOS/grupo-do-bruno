@@ -1,43 +1,30 @@
 import { Router } from 'express'
 import Location from '../models/location.js'
+import middleware from '../middleware.js'
 
 const routes = new Router()
 
-routes.get('/:id', async (request, response) => {
-  const { id } = request.params
-
-  try {
-    const location = await Location.findByPk(id)
-
-    if (!location) {
-      return response.status(404).json({ error: 'Location not found' })
-    }
-
-    response.json(location)
-  } catch (error) {
-    response.status(500).json({ error: 'Failed to fetch location' })
-  }
-})
-
-routes.get('/nameAndType', async (request, response) => {
-  const { name, type } = request.query
+routes.get('/:name', middleware('location_read'), async (req, res) => {
+  const { name } = req.params;
 
   try {
     const location = await Location.findOne({
-      where: { name, type }
-    })
+      where: { name }
+    });
 
     if (!location) {
-      return response.status(404).json({ error: 'Location not found' })
+      return res.status(404).json({ error: 'Location not found' });
     }
 
-    response.json(location)
+    res.json(location);
   } catch (error) {
-    response.status(500).json({ error: 'Failed to fetch location' })
+    res.status(500).json({ error: 'Failed to fetch location' });
   }
-})
+});
 
-routes.get('/getAll', async (request, response) => {
+
+
+routes.get('/getAll', middleware('location_read'), async (request, response) => {
   try {
     const locations = await Location.findAll()
 
@@ -47,7 +34,7 @@ routes.get('/getAll', async (request, response) => {
   }
 })
 
-routes.post('', async (request, response) => {
+routes.post('', middleware('location_create'), async (request, response) => {
   const { name, type } = request.body
 
   try {
@@ -59,7 +46,7 @@ routes.post('', async (request, response) => {
   }
 })
 
-routes.put('/:id', async (request, response) => {
+routes.put('/:id', middleware('location_update'), async (request, response) => {
   const { id } = request.params
   const { name, type } = request.body
 
@@ -81,7 +68,7 @@ routes.put('/:id', async (request, response) => {
   }
 })
 
-routes.delete('/:id', async (request, response) => {
+routes.delete('/:id', middleware('location_delete'), async (request, response) => {
   const { id } = request.params
 
   try {

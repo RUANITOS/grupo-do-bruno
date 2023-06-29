@@ -1,13 +1,16 @@
 import { Router } from 'express'
 import Resource from '../models/resource.js'
+import middleware from '../middleware.js'
 
 const routes = new Router()
 
-routes.get('/:id', async (request, response) => {
-  const { id } = request.params
+routes.get('/:name', middleware('resource_read'), async (request, response) => {
+  const { name } = request.params
 
   try {
-    const resource = await Resource.findByPk(id)
+    const resource = await Resource.findOne({
+      where: { name }
+    })
 
     if (!resource) {
       return response.status(404).json({ error: 'Resource not found' })
@@ -19,7 +22,7 @@ routes.get('/:id', async (request, response) => {
   }
 })
 
-routes.get('/getAll', async (request, response) => {
+routes.get('/getAll',middleware('resource_read'), async (request, response) => {
   try {
     const resources = await Resource.findAll()
 
@@ -29,7 +32,7 @@ routes.get('/getAll', async (request, response) => {
   }
 })
 
-routes.get('/name/:name', async (request, response) => {
+routes.get('/name/:name',middleware('resource_read'), async (request, response) => {
   const { name } = request.params
 
   try {
@@ -43,7 +46,7 @@ routes.get('/name/:name', async (request, response) => {
   }
 })
 
-routes.get('/description/:description', async (request, response) => {
+routes.get('/description/:description',middleware('resource_read'), async (request, response) => {
   const { description } = request.params
 
   try {
@@ -57,7 +60,7 @@ routes.get('/description/:description', async (request, response) => {
   }
 })
 
-routes.post('', async (request, response) => {
+routes.post('', middleware('resource_create'),async (request, response) => {
   const { name, description } = request.body
 
   try {
@@ -69,7 +72,7 @@ routes.post('', async (request, response) => {
   }
 })
 
-routes.put('/:id', async (request, response) => {
+routes.put('/:id', middleware('resource_upadate'), async (request, response) => {
   const { id } = request.params
   const { name, description } = request.body
 
@@ -91,7 +94,7 @@ routes.put('/:id', async (request, response) => {
   }
 })
 
-routes.delete('/:id', async (request, response) => {
+routes.delete('/:id', middleware('resource_delete'), async (request, response) => {
   const { id } = request.params
 
   try {
